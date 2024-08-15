@@ -36,10 +36,10 @@ func readFileLineByLine(filepath string, gWorkers, BUFFER_SIZE int) error {
 	wg.Add(gWorkers)
 	for i := 0; i < gWorkers; i++ {
 		go func() {
+			defer wg.Done()
 			for chunk := range chunkStream {
 				processReadChunk(&chunk)
 			}
-			wg.Done()
 		}()
 	}
 
