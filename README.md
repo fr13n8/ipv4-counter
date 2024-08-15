@@ -47,7 +47,7 @@ go test -v ./...
 
 ## Some benchmarks
 
-IPv4 address file size ~120mb
+IPv4 addresses file size ~120mb
 
 ```bash
 goos: windows
@@ -74,7 +74,7 @@ BenchmarkIPV4CountFromFileOpts/input_size_2048_goroutines_count_128-16          
 PASS
 ```
 
-IPv4 address file size ~120gb
+IPv4 addresses file size ~120gb
 
 ```bash
 goos: windows
@@ -86,7 +86,7 @@ IPV4CountFromFile-16   93.54 ± ∞ ¹
 PASS
 ```
 
-IPv4 address file size ~120mb
+IPv4 addresses file size ~120mb
 
 ```bash
 $ go test -v ./... -count 10 -run=^$ -benchmem -bench=Benchmark | benchstat -
