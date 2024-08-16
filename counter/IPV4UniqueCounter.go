@@ -24,6 +24,17 @@ func IPV4CountFromFile(input string, gWorkers, BUFFER_SIZE int) (uint, error) {
 	return myBitSet.Count(), nil
 }
 
+var bufferPool *sync.Pool
+
+func newBufferPool(bufferSizeMB int) *sync.Pool {
+	return &sync.Pool{
+		New: func() any {
+			b := make([]byte, bufferSizeMB)
+			return &b
+		},
+	}
+}
+
 func readFileLineByLine(filepath string, gWorkers, BUFFER_SIZE int) error {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -35,26 +46,25 @@ func readFileLineByLine(filepath string, gWorkers, BUFFER_SIZE int) error {
 	chunkSize := BUFFER_SIZE * 1024 * 1024
 	var wg sync.WaitGroup
 
+	bufferPool = newBufferPool(chunkSize)
+
 	wg.Add(gWorkers)
 	for i := 0; i < gWorkers; i++ {
 		go func() {
 			defer wg.Done()
 			for chunk := range chunkStream {
 				processReadChunk(&chunk)
+				bufferPool.Put(&chunk)
 			}
 		}()
 	}
 
-	wg.Add(1)
 	var innErr error
 	go func() {
-		buf := make([]byte, chunkSize)
 		leftover := make([]byte, 0, chunkSize)
-		defer func() {
-			close(chunkStream)
-			wg.Done()
-		}()
+		defer close(chunkStream)
 		for {
+			buf := *(bufferPool.Get().(*[]byte))
 			readTotal, err := file.Read(buf)
 			if err != nil {
 				if errors.Is(err, io.EOF) {
@@ -100,13 +110,12 @@ func processReadChunk(buf *[]byte) {
 			num := IPv4toDec(&ip)
 
 			// mu.Lock()
-			if ok := myBitSet.Test(num); !ok {
+			if !myBitSet.Test(num) {
 				myBitSet.Set(num)
 			}
 			// mu.Unlock()
 		}
 	}
-
 }
 
 // https://interlir.com/2024/02/19/converting-ipv4-addresses-to-decimal-a-step-by-step-guide/
