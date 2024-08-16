@@ -13,6 +13,7 @@ import (
 )
 
 var myBitSet = bitset.New(math.MaxInt)
+var mu sync.Mutex
 
 func IPV4CountFromFile(input string, gWorkers, BUFFER_SIZE int) (uint, error) {
 	if err := readFileLineByLine(input, gWorkers, BUFFER_SIZE); err != nil {
@@ -97,9 +98,11 @@ func processReadChunk(buf *[]byte) {
 
 			num := IPv4toDec(&ip)
 
+			mu.Lock()
 			if ok := myBitSet.Test(num); !ok {
 				myBitSet.Set(num)
 			}
+			mu.Unlock()
 		}
 	}
 
