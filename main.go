@@ -20,6 +20,10 @@ func main() {
 
 	flag.Parse()
 
+	if *input == "" {
+		log.Fatal("you need to specify input file path")
+	}
+
 	if *tracefile != "" {
 		f, err := os.Create("./profiles/" + *tracefile)
 		if err != nil {
