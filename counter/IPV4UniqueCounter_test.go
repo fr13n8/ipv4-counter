@@ -46,7 +46,7 @@ func TestIPv4Converter(t *testing.T) {
 
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
-			ans := IPv4toDec(tt.input)
+			ans := IPv4toDec(&tt.input)
 			if ans != tt.want {
 				t.Errorf("got %d, want %d", ans, tt.want)
 			}
@@ -56,7 +56,7 @@ func TestIPv4Converter(t *testing.T) {
 
 func BenchmarkIPV4CountFromFile(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		if _, err := IPV4CountFromFile(inputFile, runtime.NumCPU(), 1024); err != nil {
+		if _, err := IPV4CountFromFile(inputFile, runtime.NumCPU(), 2048); err != nil {
 			log.Fatalln(err)
 		}
 	}
@@ -64,7 +64,7 @@ func BenchmarkIPV4CountFromFile(b *testing.B) {
 
 var (
 	sizes   = []int{64, 512, 1024, 2048} // mb
-	workers = []int{1, 2, 4, 8}
+	workers = []int{1, 2, 4, 8, 10}
 )
 
 func BenchmarkIPV4CountFromFileOpts(b *testing.B) {

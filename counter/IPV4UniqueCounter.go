@@ -12,7 +12,7 @@ import (
 	"github.com/bits-and-blooms/bitset"
 )
 
-var myBitSet = bitset.New(math.MaxInt64)
+var myBitSet = bitset.New(math.MaxInt)
 
 func IPV4CountFromFile(input string, gWorkers, BUFFER_SIZE int) (uint, error) {
 	if err := readFileLineByLine(input, gWorkers, BUFFER_SIZE); err != nil {
@@ -46,9 +46,12 @@ func readFileLineByLine(filepath string, gWorkers, BUFFER_SIZE int) error {
 	wg.Add(1)
 	var innErr error
 	go func() {
-		defer wg.Done()
 		buf := make([]byte, chunkSize)
 		leftover := make([]byte, 0, chunkSize)
+		defer func() {
+			close(chunkStream)
+			wg.Done()
+		}()
 		for {
 			readTotal, err := file.Read(buf)
 			if err != nil {
@@ -75,9 +78,7 @@ func readFileLineByLine(filepath string, gWorkers, BUFFER_SIZE int) error {
 			copy(leftover, buf[lastNewLineIndex+1:])
 
 			chunkStream <- toSend
-
 		}
-		close(chunkStream)
 	}()
 
 	wg.Wait()
@@ -89,15 +90,15 @@ func processReadChunk(buf *[]byte) {
 	start := 0
 	for index, char := range *buf {
 		switch char {
+		// "\n" == 10 ASCII
 		case 10:
 			ip := (*buf)[start:index]
 			start = index + 1
 
-			num := IPv4toDec(ip)
+			num := IPv4toDec(&ip)
 
 			if ok := myBitSet.Test(num); !ok {
 				myBitSet.Set(num)
-				continue
 			}
 		}
 	}
@@ -105,13 +106,13 @@ func processReadChunk(buf *[]byte) {
 }
 
 // https://interlir.com/2024/02/19/converting-ipv4-addresses-to-decimal-a-step-by-step-guide/
-func IPv4toDec(ipAddress []byte) uint {
+func IPv4toDec(ipAddress *[]byte) uint {
 	var result, part uint
 	// Decimal IP = (A x 256^3) + (B x 256^2) + (C x 256^1) + (D x 256^0)
 	// Decimal IP = A << (8*3) | B << (8*2) | C << (8*1) | D << (8*0)
 	// "." == 46 ASCII
 	// "0" == 48 ASCII
-	for _, symbol := range ipAddress {
+	for _, symbol := range *ipAddress {
 		if symbol == 46 {
 			// result * 256 | part [When the first dot is encountered, 192 is shifted left by 8 bits, leaving space for the next octet (168) to be added.]
 			// 2) 0 * 256 | 192 => result = 192
