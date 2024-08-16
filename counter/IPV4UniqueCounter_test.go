@@ -1,14 +1,15 @@
 package counter
 
 import (
+	"flag"
 	"fmt"
-	"log"
 	"runtime"
 	"testing"
 )
 
 var (
-	inputFile = "../ip-addr.txt"
+	inputFile = flag.String("input", "../ip-addr.txt", "path to the input file with ipv4 addresses")
+	isMmap    = flag.Bool("mmap", false, "open file with mmap(fil size < ram memory)!")
 )
 
 func TestIPv4Converter(t *testing.T) {
@@ -54,14 +55,6 @@ func TestIPv4Converter(t *testing.T) {
 	}
 }
 
-func BenchmarkIPV4CountFromFile(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		if _, err := IPV4CountFromFile(inputFile, runtime.NumCPU(), 2048); err != nil {
-			log.Fatalln(err)
-		}
-	}
-}
-
 var (
 	sizes   = []int{64, 512, 1024, 2048} // mb
 	workers = []int{1, 2, 4, 8, 10}
@@ -87,7 +80,7 @@ func BenchmarkIPV4CountFromFileOpts(b *testing.B) {
 	for i := range cases {
 		b.Run(fmt.Sprintf("input_size_%d_goroutines_count_%d", cases[i].BufferSize, cases[i].GCount), func(b *testing.B) {
 			for j := 0; j < b.N; j++ {
-				IPV4CountFromFile(inputFile, cases[i].GCount, cases[i].GCount)
+				IPV4CountFromFile(*inputFile, cases[i].GCount, cases[i].GCount, *isMmap)
 			}
 		})
 	}

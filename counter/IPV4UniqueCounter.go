@@ -10,15 +10,22 @@ import (
 	"sync"
 
 	"github.com/bits-and-blooms/bitset"
+	"golang.org/x/exp/mmap"
 )
 
 var myBitSet = bitset.New(math.MaxInt)
 
 // var mu sync.Mutex
 
-func IPV4CountFromFile(input string, gWorkers, BUFFER_SIZE int) (uint, error) {
-	if err := readFileLineByLine(input, gWorkers, BUFFER_SIZE); err != nil {
-		return 0, fmt.Errorf("counting run: %w", err)
+func IPV4CountFromFile(input string, gWorkers, BUFFER_SIZE int, isMmap bool) (uint, error) {
+	if isMmap {
+		if err := readFileLineByLineWithMmap(input, gWorkers); err != nil {
+			return 0, fmt.Errorf("counting run: %w", err)
+		}
+	} else {
+		if err := readFileLineByLine(input, gWorkers, BUFFER_SIZE); err != nil {
+			return 0, fmt.Errorf("counting run: %w", err)
+		}
 	}
 
 	return myBitSet.Count(), nil
@@ -33,6 +40,71 @@ func newBufferPool(bufferSizeMB int) *sync.Pool {
 			return &b
 		},
 	}
+}
+
+func readFileLineByLineWithMmap(filepath string, gWorkers int) error {
+	file, err := mmap.Open(filepath)
+	if err != nil {
+		return fmt.Errorf("open file error: %w", err)
+	}
+	defer file.Close()
+
+	chunkStream := make(chan []byte, gWorkers)
+	chunkSize := file.Len() / gWorkers
+	var wg sync.WaitGroup
+
+	bufferPool = newBufferPool(chunkSize)
+
+	wg.Add(gWorkers)
+	for i := 0; i < gWorkers; i++ {
+		go func() {
+			defer wg.Done()
+			for chunk := range chunkStream {
+				processReadChunk(&chunk)
+				bufferPool.Put(&chunk)
+			}
+		}()
+	}
+
+	var innErr error
+	go func() {
+		leftover := make([]byte, 0, chunkSize)
+		defer close(chunkStream)
+		offset := int64(0)
+		for {
+			buf := *(bufferPool.Get().(*[]byte))
+			readTotal, err := file.ReadAt(buf, offset)
+			if err != nil {
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				innErr = fmt.Errorf("read from file error: %w", err)
+				return
+			}
+			buf = buf[:readTotal]
+			offset += int64(readTotal)
+
+			// "\n" == 10 ASCII
+			lastNewLineIndex := bytes.LastIndex(buf, []byte{10})
+
+			// This line combines any leftover data from the previous chunk (if there was an incomplete line) with the current chunk up to the last newline.
+			// includes everything from the start of the buffer up to (and including) the last newline character.
+			// toSend contains only complete lines.
+			toSend := append(leftover, buf[:lastNewLineIndex+1]...)
+
+			// There might be leftover data after the last newline character. This could be an incomplete line that needs to be preserved for the next chunk.
+			// For that we create a slice with the correct size for the leftover data.
+			leftover = make([]byte, len(buf[lastNewLineIndex+1:]))
+			// Copies the leftover data from the current chunk into the new slice. This data will be appended to the next chunk's beginning.
+			copy(leftover, buf[lastNewLineIndex+1:])
+
+			chunkStream <- toSend
+		}
+	}()
+
+	wg.Wait()
+
+	return innErr
 }
 
 func readFileLineByLine(filepath string, gWorkers, BUFFER_SIZE int) error {

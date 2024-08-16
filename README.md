@@ -48,9 +48,10 @@ go test -v ./...
 ## Some benchmarks
 
 IPv4 addresses file size ~120mb
+`ip-addr.txt` 120mb
 
 ```bash
-$ go test -v ./... --count 10 -run=^$ -benchmem -bench=BenchmarkIPV4CountFromFileOpts | benchstat -
+$ go test -v ./... --count 10 -run=^$ -benchmem -bench=BenchmarkIPV4CountFromFileOpts -input .\ip-addr.txt | benchstat -
 
 goos: windows
 goarch: amd64
@@ -129,10 +130,11 @@ IPV4CountFromFileOpts/input_size_2048_goroutines_count_160-16                   
 geomean                                                                                  109.0
 ```
 
-IPv4 addresses file size ~120gb
+IPv4 addresses file from task attachment archive
+`.\ip_addresses\ip_addresses` ~120gb
 
 ```bash
-$ go test -v ./... --count 2 -run=^$ -benchmem -bench=BenchmarkIPV4CountFromFileOpts > BenchmarkIPV4CountFromFileOpts120GB.out
+$ go test -v ./... --count 2 -run=^$ -benchmem -bench=BenchmarkIPV4CountFromFileOpts -input .\ip_addresses\ip_addresses > BenchmarkIPV4CountFromFileOpts120GB.out
 
 goos: windows
 goarch: amd64
@@ -167,4 +169,89 @@ IPV4CountFromFileOpts/input_size_2048_goroutines_count_16-16                    
                                                              │                 allocs/op                 │
 IPV4CountFromFileOpts/input_size_2048_goroutines_count_16-16                                22.50k ± ∞ ¹
 ¹ need >= 6 samples for confidence interval at level 0.95
+```
+
+### Using mmap
+
+***Use files smaller than the size of the memory.***
+`ip-addr.txt` 120mb
+
+```bash
+$ go test -v ./... --count 10 -run=^$ -benchmem -bench=BenchmarkIPV4CountFromFileOpts -mmap -input .\ip-addr.txt | benchstat -
+
+goos: windows
+goarch: amd64
+pkg: github.com/fr13n8/ipv4-counter/counter
+cpu: AMD Ryzen 9 5900HX with Radeon Graphics
+                                                              │ .\BenchmarkIPV4CountFromFileOptsWithMmap.out │
+                                                              │                    sec/op                    │
+IPV4CountFromFileOpts/input_size_64_goroutines_count_16-16                                       101.1m ± 2%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_32-16                                       92.83m ± 3%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_64-16                                       90.60m ± 1%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_128-16                                      90.77m ± 1%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_160-16                                      89.00m ± 1%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_16-16                                      101.1m ± 3%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_32-16                                      93.38m ± 4%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_64-16                                      91.47m ± 3%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_128-16                                     90.92m ± 3%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_160-16                                     90.01m ± 1%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_16-16                                     101.4m ± 2%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_32-16                                     92.78m ± 4%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_64-16                                     90.83m ± 1%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_128-16                                    91.06m ± 7%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_160-16                                    90.91m ± 1%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_16-16                                     101.5m ± 3%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_32-16                                     95.69m ± 2%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_64-16                                     90.31m ± 1%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_128-16                                    89.59m ± 1%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_160-16                                    89.26m ± 1%
+geomean                                                                                          93.13m
+
+                                                              │ .\BenchmarkIPV4CountFromFileOptsWithMmap.out │
+                                                              │                     B/op                     │
+IPV4CountFromFileOpts/input_size_64_goroutines_count_16-16                                      183.6Mi ± 1%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_32-16                                      152.5Mi ± 1%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_64-16                                      137.6Mi ± 1%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_128-16                                     131.5Mi ± 0%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_160-16                                     128.9Mi ± 0%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_16-16                                     179.5Mi ± 1%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_32-16                                     152.4Mi ± 1%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_64-16                                     138.1Mi ± 1%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_128-16                                    131.3Mi ± 0%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_160-16                                    129.1Mi ± 0%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_16-16                                    179.7Mi ± 3%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_32-16                                    152.5Mi ± 1%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_64-16                                    137.5Mi ± 0%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_128-16                                   131.5Mi ± 0%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_160-16                                   128.9Mi ± 0%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_16-16                                    181.7Mi ± 2%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_32-16                                    153.3Mi ± 1%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_64-16                                    137.3Mi ± 0%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_128-16                                   131.5Mi ± 0%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_160-16                                   129.0Mi ± 0%
+geomean                                                                                         145.2Mi
+
+                                                              │ .\BenchmarkIPV4CountFromFileOptsWithMmap.out │
+                                                              │                  allocs/op                   │
+IPV4CountFromFileOpts/input_size_64_goroutines_count_16-16                                        105.0 ± 5%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_32-16                                        167.0 ± 3%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_64-16                                        290.0 ± 3%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_128-16                                       548.5 ± 2%
+IPV4CountFromFileOpts/input_size_64_goroutines_count_160-16                                       692.0 ± 1%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_16-16                                       101.5 ± 2%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_32-16                                       169.0 ± 2%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_64-16                                       290.5 ± 3%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_128-16                                      552.0 ± 1%
+IPV4CountFromFileOpts/input_size_512_goroutines_count_160-16                                      696.5 ± 1%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_16-16                                      101.0 ± 2%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_32-16                                      168.0 ± 2%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_64-16                                      290.0 ± 3%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_128-16                                     552.5 ± 2%
+IPV4CountFromFileOpts/input_size_1024_goroutines_count_160-16                                     686.5 ± 1%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_16-16                                      102.0 ± 4%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_32-16                                      170.0 ± 2%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_64-16                                      289.5 ± 3%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_128-16                                     550.0 ± 1%
+IPV4CountFromFileOpts/input_size_2048_goroutines_count_160-16                                     691.5 ± 1%
+geomean                                                                                           285.8
 ```
