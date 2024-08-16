@@ -30,7 +30,7 @@ nmap -n -iR 100000 --exclude 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,224.0.0.0/4
 ```
 
 `-iR 100000` : Count of random IPs
-
+---
 ## Benchmarking and Tests
 
 ### Benchmarking
@@ -38,13 +38,13 @@ nmap -n -iR 100000 --exclude 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,224.0.0.0/4
 ```bash
  go test -v ./... -count 10 -run=^$ -benchmem -bench=Benchmark | benchstat -
 ```
-
+---
 ### Tests
 
 ```bash
 go test -v ./...
 ```
-
+---
 ## Some benchmarks
 
 ***IPv4 addresses file `ip-addr.txt` size ~120mb***
@@ -128,7 +128,7 @@ IPV4CountFromFileOpts/input_size_2048_goroutines_count_128-16                   
 IPV4CountFromFileOpts/input_size_2048_goroutines_count_160-16                            207.0 ±  7%
 geomean                                                                                  109.0
 ```
-
+---
 ***IPv4 addresses file from task attachment archive `.\ip_addresses\ip_addresses` size ~120gb***
 
 ```bash
@@ -168,7 +168,7 @@ IPV4CountFromFileOpts/input_size_2048_goroutines_count_16-16                    
 IPV4CountFromFileOpts/input_size_2048_goroutines_count_16-16                                22.50k ± ∞ ¹
 ¹ need >= 6 samples for confidence interval at level 0.95
 ```
-
+---
 ### Using mmap
 
 ***Use files smaller than the size of the memory.***\
