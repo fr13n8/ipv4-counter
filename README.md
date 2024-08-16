@@ -47,8 +47,7 @@ go test -v ./...
 
 ## Some benchmarks
 
-IPv4 addresses file size ~120mb
-`ip-addr.txt` 120mb
+***IPv4 addresses file `ip-addr.txt` size ~120mb***
 
 ```bash
 $ go test -v ./... --count 10 -run=^$ -benchmem -bench=BenchmarkIPV4CountFromFileOpts -input .\ip-addr.txt | benchstat -
@@ -130,8 +129,7 @@ IPV4CountFromFileOpts/input_size_2048_goroutines_count_160-16                   
 geomean                                                                                  109.0
 ```
 
-IPv4 addresses file from task attachment archive
-`.\ip_addresses\ip_addresses` ~120gb
+***IPv4 addresses file from task attachment archive `.\ip_addresses\ip_addresses` size ~120gb***
 
 ```bash
 $ go test -v ./... --count 2 -run=^$ -benchmem -bench=BenchmarkIPV4CountFromFileOpts -input .\ip_addresses\ip_addresses > BenchmarkIPV4CountFromFileOpts120GB.out
@@ -173,8 +171,8 @@ IPV4CountFromFileOpts/input_size_2048_goroutines_count_16-16                    
 
 ### Using mmap
 
-***Use files smaller than the size of the memory.***
-`ip-addr.txt` 120mb
+***Use files smaller than the size of the memory.***\
+***IPv4 addresses file `ip-addr.txt` size ~120mb***
 
 ```bash
 $ go test -v ./... --count 10 -run=^$ -benchmem -bench=BenchmarkIPV4CountFromFileOpts -mmap -input .\ip-addr.txt | benchstat -
