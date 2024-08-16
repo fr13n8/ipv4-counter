@@ -148,6 +148,7 @@ ok   github.com/fr13n8/ipv4-counter/counter  126.095s
 
 ```bash
 $ benchstat BenchmarkIPV4CountFromFileOpts120GB.out
+
 goos: windows
 goarch: amd64
 pkg: github.com/fr13n8/ipv4-counter/counter
