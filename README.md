@@ -20,7 +20,7 @@ Download sample file from [here](https://ecwid-vgv-storage.s3.eu-central-1.amazo
 
 ```bash
 go mod tidy
-go run main.go -input="file path -cf="cpu.prof"" -tf="trace.out" -mf="mem.prof"
+go run main.go -input="file path" -cf="cpu.prof"" -tf="trace.out" -mf="mem.prof"
 ```
 
 ## Generate random IPv4 addresse with nmap
