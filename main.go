@@ -16,6 +16,7 @@ func main() {
 	cpuprofile := flag.String("cf", "", "write cpu profile to `file`")
 	memprofile := flag.String("mf", "", "write memory profile to `file`")
 	tracefile := flag.String("tf", "", "write trace execution to `file`")
+	isMmap := flag.Bool("mmap", false, "open file with mmap(fil size < ram memory)!")
 	input := flag.String("input", "", "path to the input file with ipv4 addresses")
 
 	flag.Parse()
@@ -46,7 +47,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	count, err := ipv4Counter.IPV4CountFromFile(*input, runtime.NumCPU(), 1024)
+	count, err := ipv4Counter.IPV4CountFromFile(*input, runtime.NumCPU(), 2048, *isMmap)
 	if err != nil {
 		log.Fatalln("failed to count from file: ", err)
 	}
