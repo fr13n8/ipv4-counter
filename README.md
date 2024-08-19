@@ -16,6 +16,12 @@ There is a simple text file with IPv4 addresses. One line is one address, line b
 ---
 Download sample file from [here](https://ecwid-vgv-storage.s3.eu-central-1.amazonaws.com/ip_addresses.zip). Attention - the file weighs about 20Gb, and unzips to about 120Gb.
 
+---
+## Hardware specs
+**CPU**: AMD Ryzen 9 5900HX with Radeon Graphics with **8 cores** and **16 logical processors**\
+**RAM**: 32.0 GB
+
+---
 ## Run app
 
 ```bash
