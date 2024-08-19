@@ -253,3 +253,7 @@ IPV4CountFromFileOpts/input_size_2048_goroutines_count_128-16                   
 IPV4CountFromFileOpts/input_size_2048_goroutines_count_160-16                                     691.5 ± 1%
 geomean                                                                                           285.8
 ```
+
+## TODO
+
+- Try optimize with [pgo](https://go.dev/doc/pgo).
