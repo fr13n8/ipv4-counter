@@ -262,4 +262,4 @@ geomean                                                                         
 
 ## TODO
 
-- Try optimize with [pgo](https://go.dev/doc/pgo).
+- Try to optimize with [pgo](https://go.dev/doc/pgo).
